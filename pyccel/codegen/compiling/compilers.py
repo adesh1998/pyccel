@@ -15,13 +15,14 @@ import platform
 import warnings
 from pyccel.compilers.default_compilers import available_compilers, vendors
 from pyccel.errors.errors import Errors
+from security import safe_command
 
 errors = Errors()
 
 if platform.system() == 'Darwin':
     # Collect version using mac tools to avoid unexpected results on Big Sur
     # https://developer.apple.com/documentation/macos-release-notes/macos-big-sur-11_0_1-release-notes#Third-Party-Apps
-    with subprocess.Popen([shutil.which("sw_vers"), "-productVersion"], stdout=subprocess.PIPE) as p:
+    with safe_command.run(subprocess.Popen, [shutil.which("sw_vers"), "-productVersion"], stdout=subprocess.PIPE) as p:
         result, err = p.communicate()
     mac_version_tuple = result.decode("utf-8").strip().split('.')
     mac_target = '.'.join(mac_version_tuple[:2])
@@ -488,7 +489,7 @@ class Compiler:
         if verbose:
             print(' '.join(cmd))
 
-        with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        with safe_command.run(subprocess.Popen, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 universal_newlines=True) as p:
             out, err = p.communicate()
 
