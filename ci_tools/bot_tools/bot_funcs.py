@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import time
 from .github_api_interactions import GitHubAPIInteractions
+from security import safe_command
 
 default_python_versions = {
         'anaconda_linux': '3.10',
@@ -299,7 +300,7 @@ class Bot:
             if not force_run:
                 # Get a list of all commits on this branch
                 cmds = [git, 'log', '--pretty=oneline', '--first-parent', self._ref]
-                with subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+                with safe_command.run(subprocess.Popen, cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
                     out, err = p.communicate()
                     print(err)
                     assert p.returncode == 0
@@ -466,7 +467,7 @@ class Bot:
         """
         cmds = [github_cli, 'pr', 'ready', str(self._pr_id), '--undo']
 
-        with subprocess.Popen(cmds) as p:
+        with safe_command.run(subprocess.Popen, cmds) as p:
             _, err = p.communicate()
         print(err)
         self._GAI.clear_labels(self._pr_id, review_stage_labels)
@@ -545,7 +546,7 @@ class Bot:
         else:
             cmds = [github_cli, 'pr', 'ready', str(self._pr_id)]
 
-            with subprocess.Popen(cmds) as p:
+            with safe_command.run(subprocess.Popen, cmds) as p:
                 _, err = p.communicate()
             print(err)
 
@@ -852,11 +853,11 @@ class Bot:
         assert bool(base_commit)
         cmd = [git, 'diff', f"{base_commit}..{self._ref}"]
         print(cmd)
-        with subprocess.Popen(cmd + ['--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as p:
+        with safe_command.run(subprocess.Popen, cmd + ['--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as p:
             out, _ = p.communicate()
         diff = {f: None for f in out.strip().split('\n')}
         for f in diff:
-            with subprocess.Popen(cmd + [f], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as p:
+            with safe_command.run(subprocess.Popen, cmd + [f], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as p:
                 out, err = p.communicate()
             if not err:
                 lines = out.split('\n')
