@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 from bot_tools.github_api_interactions import GitHubAPIInteractions
+from security import safe_command
 
 if __name__ == '__main__':
     artifact_urls = sys.argv[1:]
@@ -14,7 +15,7 @@ if __name__ == '__main__':
     for i,url in enumerate(artifact_urls):
         GAI.download_artifact('artifact.zip', url)
         unzip = shutil.which('unzip')
-        with subprocess.Popen([unzip, 'artifact.zip']) as p:
+        with safe_command.run(subprocess.Popen, [unzip, 'artifact.zip']) as p:
             _, err = p.communicate()
         if err:
             print(err)
