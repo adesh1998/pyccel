@@ -33,6 +33,7 @@ from pyccel.parser.utilities import is_valid_filename_pyh, is_valid_filename_py
 
 from pyccel.errors.errors   import Errors, ErrorsMode
 from pyccel.errors.messages import PYCCEL_UNFOUND_IMPORTED_MODULE
+import fickling
 
 #==============================================================================
 
@@ -505,7 +506,7 @@ class BasicParser(object):
             with FileLock(filename+'.lock'):
                 try:
                     with open(filename, 'rb') as f:
-                        hs, version, parser = pickle.load(f)
+                        hs, version, parser = fickling.load(f)
                     self._created_from_pickle = True
                 except possible_pickle_errors:
                     return
@@ -513,7 +514,7 @@ class BasicParser(object):
             # read/write problems don't need to be avoided on a read-only system
             try:
                 with open(filename, 'rb') as f:
-                    hs, version, parser = pickle.load(f)
+                    hs, version, parser = fickling.load(f)
                 self._created_from_pickle = True
             except possible_pickle_errors:
                 return
