@@ -9,6 +9,7 @@ import subprocess
 import sys
 import json
 from git_evaluation_tools import get_diff_as_json
+from security import safe_command
 
 accepted_pylint_commands = {re.compile('.*/IMPORTING_EXISTING_IDENTIFIED3.py'):['reimported'],
                             re.compile('.*/TOO_FEW_ARGS.py'):['no-value-for-parameter'],
@@ -39,7 +40,7 @@ def run_pylint(file, flag, messages):
     messages : list
         The list of messages which should be printed.
     """
-    with subprocess.Popen([shutil.which('pylint'), file, '--disable=all', f'--enable={flag}']) as r:
+    with safe_command.run(subprocess.Popen, [shutil.which('pylint'), file, '--disable=all', f'--enable={flag}']) as r:
         r.communicate()
         result = r.returncode
     if result:
