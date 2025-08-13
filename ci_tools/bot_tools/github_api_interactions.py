@@ -32,7 +32,7 @@ def get_authorization():
     headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {jw_token}", "X-GitHub-Api-Version": "2022-11-28"}
 
     # Create JWT
-    reply = requests.post("https://api.github.com/app/installations/39885334/access_tokens", headers=headers)
+    reply = requests.post("https://api.github.com/app/installations/39885334/access_tokens", headers=headers, timeout=60)
 
     print(reply.text)
 
@@ -100,7 +100,7 @@ class GitHubAPIInteractions:
         requests.Response
             The response collected from the request.
         """
-        reply = requests.request(method, url, json=json, headers=self.get_headers(), **kwargs)
+        reply = requests.request(method, url, json=json, headers=self.get_headers(), **kwargs, timeout=60)
         return reply
 
     def get_branch_details(self, branch_name):
